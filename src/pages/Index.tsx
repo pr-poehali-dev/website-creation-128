@@ -5,7 +5,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 import CityAutocomplete from '@/components/CityAutocomplete';
 import AirlineSelector from '@/components/AirlineSelector';
-import { useNavigate } from 'react-router-dom';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { toast } from 'sonner';
 
 const airlines = [
   { 
@@ -43,15 +44,19 @@ const popularDestinations = [
   { city: 'Калининград', country: 'Россия', price: '7 400', image: '🏰' },
 ];
 
+const PREMIUM_CODE = 'PREMIUM2025';
+
 export default function Index() {
-  const navigate = useNavigate();
   const [userCity, setUserCity] = useState('');
   const [fromCity, setFromCity] = useState('');
   const [toCity, setToCity] = useState('');
   const [date, setDate] = useState('');
   const [showAirlineSelector, setShowAirlineSelector] = useState(false);
   const [selectedDestination, setSelectedDestination] = useState<{from: string, to: string} | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
+  const [showPremiumDialog, setShowPremiumDialog] = useState(false);
+  const [premiumInput, setPremiumInput] = useState('');
+  const [titleClickCount, setTitleClickCount] = useState(0);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -72,19 +77,24 @@ export default function Index() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Icon name="Plane" className="text-primary" size={32} />
-            <h1 className="text-2xl md:text-3xl font-bold text-primary">Путешествие.ру</h1>
+            <h1 
+              className="text-2xl md:text-3xl font-bold text-primary cursor-pointer select-none"
+              onClick={() => {
+                const newCount = titleClickCount + 1;
+                setTitleClickCount(newCount);
+                if (newCount === 3) {
+                  setShowPremiumDialog(true);
+                  setTitleClickCount(0);
+                }
+              }}
+            >
+              Путешествие.ру
+            </h1>
+            {isPremium && <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-1 rounded-full font-bold">PREMIUM</span>}
           </div>
           <nav className="hidden md:flex gap-6 items-center">
             <a href="#" className="text-foreground hover:text-primary transition-colors">Главная</a>
             <a href="#tickets" className="text-foreground hover:text-primary transition-colors">Билеты</a>
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate('/profile')}
-              className="flex items-center gap-2"
-            >
-              {isLoggedIn ? '✈️' : <Icon name="User" size={20} />}
-              <span>Профиль</span>
-            </Button>
           </nav>
         </div>
       </header>
@@ -101,6 +111,11 @@ export default function Index() {
             <h2 className="text-4xl md:text-6xl font-bold mb-6">
               Найди лучшие билеты
             </h2>
+            {isPremium && (
+              <p className="text-sm text-blue-200 mb-4 font-mono">
+                Код доступа: {PREMIUM_CODE}
+              </p>
+            )}
             <p className="text-xl md:text-2xl mb-8 text-blue-100">
               Сравнивай цены от всех авиакомпаний и бронируй выгодно
             </p>
@@ -316,6 +331,43 @@ export default function Index() {
         toCity={selectedDestination?.to || toCity}
         date={date}
       />
+
+      <Dialog open={showPremiumDialog} onOpenChange={setShowPremiumDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+              🌟 Premium доступ
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-center text-muted-foreground">
+              Введите код для активации премиум-режима
+            </p>
+            <Input
+              value={premiumInput}
+              onChange={(e) => setPremiumInput(e.target.value.toUpperCase())}
+              placeholder="Введите код"
+              className="text-center text-lg font-mono"
+              maxLength={20}
+            />
+            <Button
+              className="w-full"
+              onClick={() => {
+                if (premiumInput === PREMIUM_CODE) {
+                  setIsPremium(true);
+                  setShowPremiumDialog(false);
+                  setPremiumInput('');
+                  toast.success('🎉 Premium-режим активирован!');
+                } else {
+                  toast.error('❌ Неверный код');
+                }
+              }}
+            >
+              Активировать
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
