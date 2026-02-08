@@ -1,0 +1,14 @@
+{
+  "tests": [
+    {
+      "name": "Get auth URL",
+      "method": "GET",
+      "path": "/?redirect_uri=http://localhost:5173/profile",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "auth_url": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

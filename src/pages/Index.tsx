@@ -164,27 +164,51 @@ export default function Index() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-5xl mx-auto text-center">
             <h3 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-red-600 to-blue-600 bg-clip-text text-transparent">
-              С Днём народного единства!
+              С Годом народного единства!
             </h3>
             <p className="text-xl md:text-2xl mb-8 text-gray-700">
               Откройте для себя красоту России - путешествуйте по родной стране!
             </p>
             <div className="grid md:grid-cols-3 gap-4 mb-8">
-              <Card className="border-2 border-red-200">
+              <Card 
+                className="border-2 border-red-200 hover:shadow-xl transition-all cursor-pointer hover:-translate-y-1"
+                onClick={() => {
+                  setFromCity(userCity || 'Москва');
+                  setToCity('Москва');
+                  setSelectedDestination({ from: userCity || 'Москва', to: 'Москва' });
+                  setShowAirlineSelector(true);
+                }}
+              >
                 <CardContent className="p-6 text-center">
                   <div className="text-4xl mb-2">🏛️</div>
                   <p className="font-semibold">Москва</p>
                   <p className="text-sm text-muted-foreground">от 5 490 ₽</p>
                 </CardContent>
               </Card>
-              <Card className="border-2 border-blue-200">
+              <Card 
+                className="border-2 border-blue-200 hover:shadow-xl transition-all cursor-pointer hover:-translate-y-1"
+                onClick={() => {
+                  setFromCity(userCity || 'Москва');
+                  setToCity('Санкт-Петербург');
+                  setSelectedDestination({ from: userCity || 'Москва', to: 'Санкт-Петербург' });
+                  setShowAirlineSelector(true);
+                }}
+              >
                 <CardContent className="p-6 text-center">
                   <div className="text-4xl mb-2">🌉</div>
                   <p className="font-semibold">Санкт-Петербург</p>
                   <p className="text-sm text-muted-foreground">от 4 200 ₽</p>
                 </CardContent>
               </Card>
-              <Card className="border-2 border-red-200">
+              <Card 
+                className="border-2 border-red-200 hover:shadow-xl transition-all cursor-pointer hover:-translate-y-1"
+                onClick={() => {
+                  setFromCity(userCity || 'Москва');
+                  setToCity('Казань');
+                  setSelectedDestination({ from: userCity || 'Москва', to: 'Казань' });
+                  setShowAirlineSelector(true);
+                }}
+              >
                 <CardContent className="p-6 text-center">
                   <div className="text-4xl mb-2">🕌</div>
                   <p className="font-semibold">Казань</p>
