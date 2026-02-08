@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 import CityAutocomplete from '@/components/CityAutocomplete';
 import AirlineSelector from '@/components/AirlineSelector';
+import ChatBot from '@/components/ChatBot';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
@@ -72,13 +73,34 @@ export default function Index() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      <header className="bg-white shadow-sm sticky top-0 z-50">
+    <div className={`min-h-screen transition-colors duration-500 ${
+      isPremium 
+        ? 'bg-gradient-to-b from-gray-950 via-black to-gray-900' 
+        : 'bg-gradient-to-b from-blue-50 to-white'
+    }`}>
+      <header className={`shadow-sm sticky top-0 z-50 transition-colors duration-500 ${
+        isPremium 
+          ? 'bg-gradient-to-r from-black via-gray-900 to-black border-b border-yellow-500/20' 
+          : 'bg-white'
+      }`} style={isPremium ? {
+        boxShadow: '0 4px 20px rgba(234, 179, 8, 0.1)'
+      } : {}}>
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Icon name="Plane" className="text-primary" size={32} />
+            <Icon 
+              name="Plane" 
+              className={isPremium ? 'text-yellow-500' : 'text-primary'} 
+              size={32} 
+              style={isPremium ? {
+                filter: 'drop-shadow(0 0 10px rgba(234, 179, 8, 0.5))'
+              } : {}}
+            />
             <h1 
-              className="text-2xl md:text-3xl font-bold text-primary cursor-pointer select-none"
+              className={`text-2xl md:text-3xl font-bold cursor-pointer select-none transition-all duration-300 ${
+                isPremium 
+                  ? 'text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 hover:scale-105' 
+                  : 'text-primary'
+              }`}
               onClick={() => {
                 const newCount = titleClickCount + 1;
                 setTitleClickCount(newCount);
@@ -87,36 +109,91 @@ export default function Index() {
                   setTitleClickCount(0);
                 }
               }}
+              style={isPremium ? {
+                textShadow: '0 0 30px rgba(234, 179, 8, 0.5), 0 0 60px rgba(234, 179, 8, 0.3)',
+                transform: 'perspective(1000px) rotateX(0deg)',
+                transition: 'all 0.3s ease'
+              } : {}}
             >
               Путешествие.ру
             </h1>
-            {isPremium && <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-1 rounded-full font-bold">PREMIUM</span>}
+            {isPremium && (
+              <span 
+                className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-3 py-1 rounded-full font-bold animate-pulse"
+                style={{
+                  boxShadow: '0 0 20px rgba(234, 179, 8, 0.6)'
+                }}
+              >
+                ⚡ PREMIUM
+              </span>
+            )}
           </div>
           <nav className="hidden md:flex gap-6 items-center">
-            <a href="#" className="text-foreground hover:text-primary transition-colors">Главная</a>
-            <a href="#tickets" className="text-foreground hover:text-primary transition-colors">Билеты</a>
+            <a href="#" className={`transition-colors ${
+              isPremium 
+                ? 'text-yellow-200 hover:text-yellow-400' 
+                : 'text-foreground hover:text-primary'
+            }`}>Главная</a>
+            <a href="#tickets" className={`transition-colors ${
+              isPremium 
+                ? 'text-yellow-200 hover:text-yellow-400' 
+                : 'text-foreground hover:text-primary'
+            }`}>Билеты</a>
           </nav>
         </div>
       </header>
 
-      <section className="relative bg-gradient-to-r from-primary to-blue-600 text-white py-20 md:py-32 overflow-hidden">
+      <section className={`relative text-white py-20 md:py-32 overflow-hidden transition-all duration-500 ${
+        isPremium 
+          ? 'bg-gradient-to-r from-black via-gray-900 to-black' 
+          : 'bg-gradient-to-r from-primary to-blue-600'
+      }`} style={isPremium ? {
+        boxShadow: 'inset 0 0 100px rgba(234, 179, 8, 0.1)'
+      } : {}}>
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-10 text-8xl">✈️</div>
-          <div className="absolute bottom-10 right-20 text-6xl">🌍</div>
-          <div className="absolute top-40 right-40 text-7xl">☁️</div>
+          <div className={`absolute top-20 left-10 text-8xl ${isPremium ? 'animate-pulse' : ''}`} style={isPremium ? {
+            filter: 'drop-shadow(0 0 30px rgba(234, 179, 8, 0.8))'
+          } : {}}>✈️</div>
+          <div className={`absolute bottom-10 right-20 text-6xl ${isPremium ? 'animate-pulse' : ''}`} style={isPremium ? {
+            filter: 'drop-shadow(0 0 30px rgba(234, 179, 8, 0.8))'
+          } : {}}>🌍</div>
+          <div className={`absolute top-40 right-40 text-7xl ${isPremium ? 'animate-pulse' : ''}`} style={isPremium ? {
+            filter: 'drop-shadow(0 0 30px rgba(234, 179, 8, 0.8))'
+          } : {}}>☁️</div>
+          {isPremium && (
+            <>
+              <div className="absolute top-1/2 left-1/4 text-6xl animate-pulse" style={{
+                filter: 'drop-shadow(0 0 40px rgba(234, 179, 8, 0.6))'
+              }}>⭐</div>
+              <div className="absolute bottom-1/3 right-1/3 text-5xl animate-pulse" style={{
+                filter: 'drop-shadow(0 0 40px rgba(234, 179, 8, 0.6))'
+              }}>💎</div>
+            </>
+          )}
         </div>
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center animate-fade-in">
-            <h2 className="text-4xl md:text-6xl font-bold mb-6">
+            <h2 className={`text-4xl md:text-6xl font-bold mb-6 transition-all duration-300 ${
+              isPremium 
+                ? 'text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-500 to-orange-500' 
+                : ''
+            }`} style={isPremium ? {
+              textShadow: '0 0 40px rgba(234, 179, 8, 0.5)',
+              transform: 'perspective(1000px) rotateX(5deg)'
+            } : {}}>
               Найди лучшие билеты
             </h2>
             {isPremium && (
-              <p className="text-sm text-blue-200 mb-4 font-mono">
-                Код доступа: {PREMIUM_CODE}
+              <p className="text-sm text-yellow-300 mb-4 font-mono animate-pulse" style={{
+                textShadow: '0 0 10px rgba(234, 179, 8, 0.8)'
+              }}>
+                🔑 Код доступа: {PREMIUM_CODE}
               </p>
             )}
-            <p className="text-xl md:text-2xl mb-8 text-blue-100">
+            <p className={`text-xl md:text-2xl mb-8 ${
+              isPremium ? 'text-yellow-100' : 'text-blue-100'
+            }`}>
               Сравнивай цены от всех авиакомпаний и бронируй выгодно
             </p>
             {userCity && (
@@ -126,7 +203,14 @@ export default function Index() {
               </div>
             )}
 
-            <Card className="bg-white/95 backdrop-blur-sm shadow-2xl animate-scale-in">
+            <Card className={`backdrop-blur-sm shadow-2xl animate-scale-in transition-all duration-500 ${
+              isPremium 
+                ? 'bg-gradient-to-br from-gray-900 via-black to-gray-900 border-2 border-yellow-500/30' 
+                : 'bg-white/95'
+            }`} style={isPremium ? {
+              boxShadow: '0 0 60px rgba(234, 179, 8, 0.3), 0 20px 40px rgba(0,0,0,0.5)',
+              transform: 'perspective(1000px) rotateX(2deg)'
+            } : {}}>
               <CardContent className="p-6 md:p-8">
                 <div className="grid md:grid-cols-3 gap-4 mb-4">
                   <CityAutocomplete
@@ -134,26 +218,40 @@ export default function Index() {
                     onChange={setFromCity}
                     placeholder={userCity || "Город отправления"}
                     label="Откуда"
+                    isPremium={isPremium}
                   />
                   <CityAutocomplete
                     value={toCity}
                     onChange={setToCity}
                     placeholder="Город назначения"
                     label="Куда"
+                    isPremium={isPremium}
                   />
                   <div>
-                    <label className="text-sm font-medium text-foreground mb-2 block">Дата</label>
+                    <label className={`text-sm font-medium mb-2 block ${
+                      isPremium ? 'text-yellow-300' : 'text-foreground'
+                    }`}>Дата</label>
                     <Input 
                       type="date" 
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      className="h-12"
+                      className={`h-12 ${
+                        isPremium ? 'bg-gray-800 border-yellow-500/30 text-yellow-100' : ''
+                      }`}
                     />
                   </div>
                 </div>
                 <Button 
                   size="lg" 
-                  className="w-full h-12 text-lg font-semibold"
+                  className={`w-full h-12 text-lg font-semibold transition-all duration-300 ${
+                    isPremium 
+                      ? 'bg-gradient-to-r from-yellow-500 via-yellow-600 to-orange-600 hover:from-yellow-600 hover:via-yellow-700 hover:to-orange-700 text-black font-bold' 
+                      : ''
+                  }`}
+                  style={isPremium ? {
+                    boxShadow: '0 0 30px rgba(234, 179, 8, 0.5), 0 10px 20px rgba(0,0,0,0.3)',
+                    transform: 'perspective(1000px)'
+                  } : {}}
                   onClick={() => {
                     if (fromCity && toCity) {
                       setSelectedDestination({ from: fromCity, to: toCity });
@@ -162,7 +260,7 @@ export default function Index() {
                   }}
                 >
                   <Icon name="Search" className="mr-2" />
-                  Найти билеты
+                  {isPremium ? '⚡ Найти билеты PREMIUM' : 'Найти билеты'}
                 </Button>
               </CardContent>
             </Card>
@@ -331,6 +429,8 @@ export default function Index() {
         toCity={selectedDestination?.to || toCity}
         date={date}
       />
+
+      <ChatBot isPremium={isPremium} />
 
       <Dialog open={showPremiumDialog} onOpenChange={setShowPremiumDialog}>
         <DialogContent className="sm:max-w-md">

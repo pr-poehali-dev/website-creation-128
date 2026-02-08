@@ -1,0 +1,34 @@
+{
+  "tests": [
+    {
+      "name": "Basic bot response",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "message": "Помоги выбрать билет в Москву",
+        "isPremium": false
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "response": "string",
+        "isPremium": false
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Premium bot response",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "message": "Какой маршрут лучше выбрать?",
+        "isPremium": true
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "response": "string",
+        "isPremium": true
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
