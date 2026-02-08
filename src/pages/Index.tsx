@@ -3,6 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
+import CityAutocomplete from '@/components/CityAutocomplete';
+import AirlineSelector from '@/components/AirlineSelector';
+import { useNavigate } from 'react-router-dom';
 
 const airlines = [
   { 
@@ -41,9 +44,14 @@ const popularDestinations = [
 ];
 
 export default function Index() {
+  const navigate = useNavigate();
   const [userCity, setUserCity] = useState('');
   const [fromCity, setFromCity] = useState('');
   const [toCity, setToCity] = useState('');
+  const [date, setDate] = useState('');
+  const [showAirlineSelector, setShowAirlineSelector] = useState(false);
+  const [selectedDestination, setSelectedDestination] = useState<{from: string, to: string} | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -66,10 +74,17 @@ export default function Index() {
             <Icon name="Plane" className="text-primary" size={32} />
             <h1 className="text-2xl md:text-3xl font-bold text-primary">Путешествие.ру</h1>
           </div>
-          <nav className="hidden md:flex gap-6">
+          <nav className="hidden md:flex gap-6 items-center">
             <a href="#" className="text-foreground hover:text-primary transition-colors">Главная</a>
             <a href="#tickets" className="text-foreground hover:text-primary transition-colors">Билеты</a>
-            <a href="#profile" className="text-foreground hover:text-primary transition-colors">Профиль</a>
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/profile')}
+              className="flex items-center gap-2"
+            >
+              {isLoggedIn ? '✈️' : <Icon name="User" size={20} />}
+              <span>Профиль</span>
+            </Button>
           </nav>
         </div>
       </header>
@@ -99,33 +114,38 @@ export default function Index() {
             <Card className="bg-white/95 backdrop-blur-sm shadow-2xl animate-scale-in">
               <CardContent className="p-6 md:p-8">
                 <div className="grid md:grid-cols-3 gap-4 mb-4">
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-2 block">Откуда</label>
-                    <Input 
-                      placeholder={userCity || "Город отправления"} 
-                      value={fromCity}
-                      onChange={(e) => setFromCity(e.target.value)}
-                      className="h-12"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-2 block">Куда</label>
-                    <Input 
-                      placeholder="Город назначения" 
-                      value={toCity}
-                      onChange={(e) => setToCity(e.target.value)}
-                      className="h-12"
-                    />
-                  </div>
+                  <CityAutocomplete
+                    value={fromCity}
+                    onChange={setFromCity}
+                    placeholder={userCity || "Город отправления"}
+                    label="Откуда"
+                  />
+                  <CityAutocomplete
+                    value={toCity}
+                    onChange={setToCity}
+                    placeholder="Город назначения"
+                    label="Куда"
+                  />
                   <div>
                     <label className="text-sm font-medium text-foreground mb-2 block">Дата</label>
                     <Input 
                       type="date" 
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
                       className="h-12"
                     />
                   </div>
                 </div>
-                <Button size="lg" className="w-full h-12 text-lg font-semibold">
+                <Button 
+                  size="lg" 
+                  className="w-full h-12 text-lg font-semibold"
+                  onClick={() => {
+                    if (fromCity && toCity) {
+                      setSelectedDestination({ from: fromCity, to: toCity });
+                      setShowAirlineSelector(true);
+                    }
+                  }}
+                >
                   <Icon name="Search" className="mr-2" />
                   Найти билеты
                 </Button>
@@ -135,40 +155,50 @@ export default function Index() {
         </div>
       </section>
 
-      <section className="py-16 bg-gradient-to-r from-red-500 to-red-600 text-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-6xl">✈️</span>
-                <h3 className="text-4xl font-bold">Аэрофлот</h3>
-              </div>
-              <p className="text-xl mb-4">Специальное предложение: скидка до 30% на международные рейсы</p>
-              <ul className="space-y-2 text-lg">
-                <li className="flex items-center gap-2">
-                  <Icon name="Check" size={20} />
-                  Москва → Париж от 15 900 ₽
-                </li>
-                <li className="flex items-center gap-2">
-                  <Icon name="Check" size={20} />
-                  Москва → Дубай от 18 500 ₽
-                </li>
-                <li className="flex items-center gap-2">
-                  <Icon name="Check" size={20} />
-                  Москва → Бангкок от 24 200 ₽
-                </li>
-              </ul>
+      <section className="py-16 bg-gradient-to-r from-red-600 via-white to-blue-600 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-10 left-10 text-6xl">🇷🇺</div>
+          <div className="absolute bottom-10 right-10 text-6xl">🇷🇺</div>
+          <div className="absolute top-20 right-20 text-5xl">🎆</div>
+        </div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto text-center">
+            <h3 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-red-600 to-blue-600 bg-clip-text text-transparent">
+              С Днём народного единства!
+            </h3>
+            <p className="text-xl md:text-2xl mb-8 text-gray-700">
+              Откройте для себя красоту России - путешествуйте по родной стране!
+            </p>
+            <div className="grid md:grid-cols-3 gap-4 mb-8">
+              <Card className="border-2 border-red-200">
+                <CardContent className="p-6 text-center">
+                  <div className="text-4xl mb-2">🏛️</div>
+                  <p className="font-semibold">Москва</p>
+                  <p className="text-sm text-muted-foreground">от 5 490 ₽</p>
+                </CardContent>
+              </Card>
+              <Card className="border-2 border-blue-200">
+                <CardContent className="p-6 text-center">
+                  <div className="text-4xl mb-2">🌉</div>
+                  <p className="font-semibold">Санкт-Петербург</p>
+                  <p className="text-sm text-muted-foreground">от 4 200 ₽</p>
+                </CardContent>
+              </Card>
+              <Card className="border-2 border-red-200">
+                <CardContent className="p-6 text-center">
+                  <div className="text-4xl mb-2">🕌</div>
+                  <p className="font-semibold">Казань</p>
+                  <p className="text-sm text-muted-foreground">от 6 100 ₽</p>
+                </CardContent>
+              </Card>
             </div>
-            <Button size="lg" variant="secondary" className="h-14 px-8 text-lg font-semibold">
-              Узнать подробнее
-            </Button>
           </div>
         </div>
       </section>
 
       <section id="tickets" className="py-16">
         <div className="container mx-auto px-4">
-          <h3 className="text-3xl md:text-4xl font-bold text-center mb-12">Выберите авиакомпанию</h3>
+          <h3 className="text-3xl md:text-4xl font-bold text-center mb-12">Наши партнёры</h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {airlines.map((airline, index) => (
               <Card 
@@ -198,6 +228,10 @@ export default function Index() {
               <Card 
                 key={index} 
                 className="hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer overflow-hidden group"
+                onClick={() => {
+                  setSelectedDestination({ from: userCity || 'Москва', to: dest.city });
+                  setShowAirlineSelector(true);
+                }}
               >
                 <div className="h-40 bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-8xl group-hover:scale-110 transition-transform">
                   {dest.image}
@@ -250,6 +284,14 @@ export default function Index() {
           </div>
         </div>
       </footer>
+
+      <AirlineSelector 
+        open={showAirlineSelector}
+        onClose={() => setShowAirlineSelector(false)}
+        fromCity={selectedDestination?.from || fromCity}
+        toCity={selectedDestination?.to || toCity}
+        date={date}
+      />
     </div>
   );
 }
