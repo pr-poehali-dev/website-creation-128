@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Roboto:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -6,35 +6,39 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 210 24% 16%;
+    --background: 220 20% 97%;
+    --foreground: 220 20% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 210 24% 16%;
+    --card-foreground: 220 20% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 24% 16%;
+    --popover-foreground: 220 20% 10%;
 
-    --primary: 199 89% 48%;
+    --primary: 230 80% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 197 71% 73%;
-    --secondary-foreground: 210 24% 16%;
+    --secondary: 220 15% 93%;
+    --secondary-foreground: 220 20% 10%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 15% 93%;
+    --muted-foreground: 220 10% 50%;
 
-    --accent: 24 95% 53%;
+    --accent: 260 80% 65%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 199 89% 48%;
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 230 80% 60%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
+
+    --glass-bg: rgba(255, 255, 255, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -56,8 +60,8 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 230 80% 65%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -65,7 +69,7 @@
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 260 80% 65%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
@@ -92,7 +96,13 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: "Roboto", sans-serif;
+    font-family:
+      "Inter",
+      -apple-system,
+      BlinkMacSystemFont,
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1,
@@ -101,6 +111,58 @@
   h4,
   h5,
   h6 {
-    font-family: "Montserrat", sans-serif;
+    font-family:
+      "Inter",
+      -apple-system,
+      BlinkMacSystemFont,
+      sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  }
+
+  .glass-premium {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(234, 179, 8, 0.2);
+    box-shadow: 0 8px 32px rgba(234, 179, 8, 0.1);
+  }
+
+  .text-gradient {
+    @apply text-transparent bg-clip-text;
+  }
+
+  .gradient-primary {
+    @apply bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600;
+  }
+
+  .gradient-premium {
+    @apply bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500;
   }
 }

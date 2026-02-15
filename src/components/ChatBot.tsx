@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 
 interface ChatBotProps {
@@ -14,37 +13,29 @@ interface Message {
   sender: 'user' | 'bot';
 }
 
-const basicResponses = [
-  'Хм, попробуйте спросить проще...',
-  'Я немного запутался, можете уточнить?',
-  'Интересный вопрос! Но я не уверен...',
-  'Может быть, да, а может и нет 🤔',
-  'Это сложно... А что если поискать в интернете?'
-];
-
-const premiumResponses = [
-  'Отличный выбор! Я рекомендую бронировать заранее для лучших цен.',
-  'Для этого направления лучше всего подойдет Аэрофлот или S7 - они предлагают прямые рейсы.',
-  'Совет: если лететь в будний день, цена может быть на 30-40% ниже.',
-  'Обратите внимание на время вылета - утренние рейсы обычно дешевле.',
-  'Я могу помочь найти оптимальный маршрут с пересадками, если прямых рейсов нет.'
-];
-
 export default function ChatBot({ isPremium }: ChatBotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: isPremium 
-        ? 'Здравствуйте! Я GigaChat - ваш премиум-помощник. Готов помочь с выбором билетов и маршрутов!' 
-        : 'Привет! Я бот-помощник. Постараюсь помочь, но могу немного путаться 😅',
+      text: isPremium
+        ? 'Добро пожаловать! Я ваш Premium-ассистент. Помогу подобрать лучшие билеты и маршруты.'
+        : 'Привет! Я бот-помощник. Постараюсь помочь, но могу немного путаться',
       sender: 'bot'
     }
   ]);
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -55,127 +46,145 @@ export default function ChatBot({ isPremium }: ChatBotProps) {
     setMessages(prev => [...prev, userMessage]);
     const userInput = input;
     setInput('');
+    setIsLoading(true);
 
     try {
       const response = await fetch('https://functions.poehali.dev/758a1ee1-8b4e-4fc1-9c15-4bac393d4177', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: userInput,
-          isPremium: isPremium
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userInput, isPremium })
       });
-
       const data = await response.json();
-      
-      const botMessage: Message = {
+      setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
-        text: data.response || 'Извините, произошла ошибка. Попробуйте еще раз.',
+        text: data.response || 'Произошла ошибка. Попробуйте ещё раз.',
         sender: 'bot'
-      };
-      
-      setMessages(prev => [...prev, botMessage]);
-    } catch (error) {
-      const responses = isPremium ? premiumResponses : basicResponses;
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-      
-      const botMessage: Message = {
+      }]);
+    } catch {
+      setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
-        text: randomResponse,
+        text: 'Не удалось подключиться. Проверьте интернет.',
         sender: 'bot'
-      };
-      
-      setMessages(prev => [...prev, botMessage]);
+      }]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <>
-      <Button
+      <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-6 z-50 rounded-full w-16 h-16 shadow-2xl ${
-          isPremium 
-            ? 'bg-gradient-to-r from-yellow-500 via-yellow-600 to-orange-600 hover:from-yellow-600 hover:via-yellow-700 hover:to-orange-700' 
-            : 'bg-primary'
+        className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 ${
+          isPremium
+            ? 'gradient-premium shadow-lg shadow-yellow-500/30'
+            : 'gradient-primary shadow-lg shadow-blue-500/30'
         }`}
-        style={isPremium ? {
-          boxShadow: '0 0 30px rgba(234, 179, 8, 0.6), 0 0 60px rgba(234, 179, 8, 0.3)',
-        } : {}}
       >
-        <Icon name={isOpen ? 'X' : 'MessageCircle'} size={28} />
-      </Button>
+        <Icon name={isOpen ? 'X' : 'MessageCircle'} size={24} className="text-white" />
+      </button>
 
       {isOpen && (
-        <Card 
-          className={`fixed bottom-24 right-6 z-50 w-96 shadow-2xl ${
-            isPremium 
-              ? 'bg-gradient-to-br from-gray-900 via-black to-gray-900 border-yellow-500/30' 
-              : 'bg-white'
-          }`}
-          style={isPremium ? {
-            boxShadow: '0 0 40px rgba(234, 179, 8, 0.4)',
-          } : {}}
-        >
-          <CardHeader className={`border-b ${isPremium ? 'border-yellow-500/20 bg-black/50' : ''}`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded-full ${isPremium ? 'bg-yellow-500' : 'bg-green-500'} animate-pulse`} />
-                <h3 className={`font-bold ${isPremium ? 'text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500' : 'text-foreground'}`}>
-                  {isPremium ? '⚡ GigaChat' : '🤖 Помощник'}
+        <div className={`fixed bottom-24 right-6 z-50 w-[360px] max-w-[calc(100vw-3rem)] rounded-3xl overflow-hidden animate-slide-up ${
+          isPremium ? 'glass-premium' : 'glass-strong'
+        }`}>
+          <div className={`px-5 py-4 border-b ${
+            isPremium ? 'border-yellow-500/10' : 'border-black/5'
+          }`}>
+            <div className="flex items-center gap-3">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
+                isPremium ? 'gradient-premium' : 'gradient-primary'
+              }`}>
+                <Icon name="Bot" size={18} className="text-white" />
+              </div>
+              <div>
+                <h3 className={`text-sm font-bold ${
+                  isPremium ? 'text-gradient gradient-premium' : 'text-foreground'
+                }`}>
+                  {isPremium ? 'Premium Ассистент' : 'Помощник'}
                 </h3>
+                <div className="flex items-center gap-1.5">
+                  <div className={`w-1.5 h-1.5 rounded-full ${
+                    isPremium ? 'bg-yellow-400' : 'bg-emerald-400'
+                  }`} />
+                  <span className={`text-[10px] ${
+                    isPremium ? 'text-yellow-100/40' : 'text-muted-foreground'
+                  }`}>
+                    Онлайн
+                  </span>
+                </div>
               </div>
               {isPremium && (
-                <span className="text-xs bg-gradient-to-r from-yellow-500 to-orange-500 text-black px-2 py-1 rounded-full font-bold">
-                  PREMIUM
+                <span className="ml-auto text-[9px] gradient-premium text-white px-2 py-0.5 rounded-full font-bold">
+                  PRO
                 </span>
               )}
             </div>
-          </CardHeader>
-          <CardContent className="p-4">
-            <div className="h-80 overflow-y-auto mb-4 space-y-3">
-              {messages.map(msg => (
-                <div
-                  key={msg.id}
-                  className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                      msg.sender === 'user'
-                        ? isPremium
-                          ? 'bg-gradient-to-r from-yellow-600 to-orange-600 text-white'
-                          : 'bg-primary text-primary-foreground'
-                        : isPremium
-                        ? 'bg-gray-800 text-yellow-100 border border-yellow-500/20'
-                        : 'bg-muted text-foreground'
-                    }`}
-                    style={isPremium && msg.sender === 'bot' ? {
-                      boxShadow: '0 0 20px rgba(234, 179, 8, 0.1)',
-                    } : {}}
-                  >
-                    {msg.text}
+          </div>
+
+          <div ref={scrollRef} className="h-80 overflow-y-auto px-4 py-4 space-y-3">
+            {messages.map(msg => (
+              <div
+                key={msg.id}
+                className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${
+                  msg.sender === 'user'
+                    ? isPremium
+                      ? 'gradient-premium text-black font-medium'
+                      : 'gradient-primary text-white'
+                    : isPremium
+                      ? 'bg-white/5 text-yellow-100/80 border border-yellow-500/10'
+                      : 'bg-white/60 text-foreground border border-white/20'
+                }`}>
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className={`rounded-2xl px-4 py-3 ${
+                  isPremium ? 'bg-white/5 border border-yellow-500/10' : 'bg-white/60 border border-white/20'
+                }`}>
+                  <div className="flex gap-1.5">
+                    <div className={`w-2 h-2 rounded-full animate-bounce ${isPremium ? 'bg-yellow-400' : 'bg-blue-400'}`} style={{ animationDelay: '0ms' }} />
+                    <div className={`w-2 h-2 rounded-full animate-bounce ${isPremium ? 'bg-yellow-400' : 'bg-blue-400'}`} style={{ animationDelay: '150ms' }} />
+                    <div className={`w-2 h-2 rounded-full animate-bounce ${isPremium ? 'bg-yellow-400' : 'bg-blue-400'}`} style={{ animationDelay: '300ms' }} />
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
+          </div>
+
+          <div className={`px-4 pb-4 pt-2 border-t ${
+            isPremium ? 'border-yellow-500/10' : 'border-black/5'
+          }`}>
             <div className="flex gap-2">
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                placeholder={isPremium ? 'Спросите что угодно...' : 'Задайте вопрос...'}
-                className={isPremium ? 'bg-gray-800 border-yellow-500/20 text-yellow-100 placeholder:text-yellow-700' : ''}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                placeholder="Напишите сообщение..."
+                className={`h-11 rounded-xl border-0 text-sm ${
+                  isPremium
+                    ? 'bg-white/5 text-yellow-100 placeholder:text-yellow-100/30'
+                    : 'bg-white/60 text-foreground placeholder:text-muted-foreground'
+                }`}
               />
-              <Button 
+              <Button
                 onClick={handleSend}
-                className={isPremium ? 'bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700' : ''}
+                disabled={isLoading}
+                className={`h-11 w-11 rounded-xl p-0 ${
+                  isPremium
+                    ? 'gradient-premium text-black'
+                    : 'gradient-primary text-white'
+                }`}
               >
-                <Icon name="Send" size={20} />
+                <Icon name="Send" size={18} />
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
     </>
   );
