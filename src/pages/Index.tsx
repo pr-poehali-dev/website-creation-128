@@ -37,6 +37,18 @@ export default function Index() {
   const [showPremiumDialog, setShowPremiumDialog] = useState(false);
   const [premiumInput, setPremiumInput] = useState('');
   const [titleClickCount, setTitleClickCount] = useState(0);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('theme') === 'dark' ||
+        (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDark);
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  }, [isDark]);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -49,12 +61,14 @@ export default function Index() {
 
   const bgBase = isPremium
     ? 'bg-gradient-to-br from-gray-950 via-gray-900 to-black'
-    : 'bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50/30';
+    : isDark
+      ? 'bg-gradient-to-br from-gray-950 via-slate-900 to-gray-900'
+      : 'bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50/30';
 
   return (
     <div className={`min-h-screen ${bgBase} transition-all duration-700`}>
 
-      <header className={`fixed top-0 left-0 right-0 z-50 ${isPremium ? 'glass-premium' : 'glass-strong'}`}>
+      <header className={`fixed top-0 left-0 right-0 z-50 ${isPremium ? 'glass-premium' : isDark ? 'glass-dark' : 'glass-strong'}`}>
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
@@ -64,7 +78,7 @@ export default function Index() {
             </div>
             <h1
               className={`text-xl font-extrabold tracking-tight cursor-pointer select-none transition-all duration-300 ${
-                isPremium ? 'text-gradient gradient-premium' : 'text-foreground'
+                isPremium ? 'text-gradient gradient-premium' : isDark ? 'text-white' : 'text-foreground'
               }`}
               onClick={() => {
                 const n = titleClickCount + 1;
@@ -83,21 +97,37 @@ export default function Index() {
               </span>
             )}
           </div>
-          <nav className="hidden md:flex gap-1 items-center">
-            {['Главная', 'Билеты', 'Направления'].map(item => (
-              <a
-                key={item}
-                href="#"
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                  isPremium
-                    ? 'text-yellow-200/80 hover:text-yellow-100 hover:bg-yellow-500/10'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-black/5'
-                }`}
-              >
-                {item}
-              </a>
-            ))}
-          </nav>
+          <div className="flex items-center gap-1">
+            <nav className="hidden md:flex gap-1 items-center">
+              {['Главная', 'Билеты', 'Направления'].map(item => (
+                <a
+                  key={item}
+                  href="#"
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    isPremium
+                      ? 'text-yellow-200/80 hover:text-yellow-100 hover:bg-yellow-500/10'
+                      : isDark
+                        ? 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-black/5'
+                  }`}
+                >
+                  {item}
+                </a>
+              ))}
+            </nav>
+            <button
+              onClick={() => setIsDark(!isDark)}
+              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 ${
+                isPremium
+                  ? 'hover:bg-yellow-500/10 text-yellow-400'
+                  : isDark
+                    ? 'hover:bg-white/10 text-slate-300'
+                    : 'hover:bg-black/5 text-muted-foreground'
+              }`}
+            >
+              <Icon name={isDark ? 'Sun' : 'Moon'} size={20} />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -119,7 +149,9 @@ export default function Index() {
             <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-6 ${
               isPremium
                 ? 'glass-premium text-yellow-300'
-                : 'glass text-muted-foreground'
+                : isDark
+                  ? 'glass-dark text-slate-300'
+                  : 'glass text-muted-foreground'
             }`}>
               <Icon name="Sparkles" size={16} />
               {isPremium ? 'Premium-поиск активирован' : 'Умный поиск билетов'}
@@ -127,7 +159,7 @@ export default function Index() {
             <h2 className={`text-4xl md:text-6xl font-extrabold tracking-tight leading-tight mb-4 ${
               isPremium
                 ? 'text-gradient gradient-premium'
-                : 'text-foreground'
+                : isDark ? 'text-white' : 'text-foreground'
             }`}>
               Найди свой
               <br />
@@ -141,14 +173,14 @@ export default function Index() {
               </p>
             )}
             <p className={`text-lg md:text-xl max-w-xl mx-auto ${
-              isPremium ? 'text-yellow-100/60' : 'text-muted-foreground'
+              isPremium ? 'text-yellow-100/60' : isDark ? 'text-slate-400' : 'text-muted-foreground'
             }`}>
               Сравнивай цены от всех авиакомпаний и бронируй выгодно
             </p>
           </div>
 
           <div className={`max-w-3xl mx-auto rounded-3xl p-6 md:p-8 animate-scale-in ${
-            isPremium ? 'glass-premium' : 'glass-strong'
+            isPremium ? 'glass-premium' : isDark ? 'glass-dark' : 'glass-strong'
           }`}>
             <div className="grid md:grid-cols-3 gap-4 mb-5">
               <CityAutocomplete
@@ -167,7 +199,7 @@ export default function Index() {
               />
               <div>
                 <label className={`text-sm font-medium mb-2 block ${
-                  isPremium ? 'text-yellow-300/80' : 'text-muted-foreground'
+                  isPremium ? 'text-yellow-300/80' : isDark ? 'text-slate-400' : 'text-muted-foreground'
                 }`}>Дата</label>
                 <Input
                   type="date"
@@ -176,7 +208,9 @@ export default function Index() {
                   className={`h-12 rounded-xl border-0 ${
                     isPremium
                       ? 'bg-white/5 text-yellow-100 focus:ring-yellow-500/30'
-                      : 'bg-white/70 focus:bg-white text-foreground'
+                      : isDark
+                        ? 'bg-white/5 text-slate-200 focus:bg-white/10'
+                        : 'bg-white/70 focus:bg-white text-foreground'
                   }`}
                 />
               </div>
@@ -211,11 +245,11 @@ export default function Index() {
         <div className="container mx-auto relative z-10">
           <div className="max-w-3xl mx-auto text-center mb-8 animate-fade-in">
             <h3 className={`text-2xl md:text-3xl font-extrabold tracking-tight mb-2 ${
-              isPremium ? 'text-gradient gradient-premium' : 'text-foreground'
+              isPremium ? 'text-gradient gradient-premium' : isDark ? 'text-white' : 'text-foreground'
             }`}>
               С Годом народного единства!
             </h3>
-            <p className={`text-base ${isPremium ? 'text-yellow-100/50' : 'text-muted-foreground'}`}>
+            <p className={`text-base ${isPremium ? 'text-yellow-100/50' : isDark ? 'text-slate-400' : 'text-muted-foreground'}`}>
               Откройте красоту России
             </p>
           </div>
@@ -230,7 +264,9 @@ export default function Index() {
                 className={`rounded-2xl p-5 text-center cursor-pointer transition-all duration-300 hover:-translate-y-1 ${
                   isPremium
                     ? 'glass-premium hover:border-yellow-500/40'
-                    : 'glass-strong hover:shadow-lg'
+                    : isDark
+                      ? 'glass-dark hover:border-white/10'
+                      : 'glass-strong hover:shadow-lg'
                 }`}
                 onClick={() => {
                   setFromCity(userCity || 'Москва');
@@ -240,8 +276,8 @@ export default function Index() {
                 }}
               >
                 <div className="text-4xl mb-2">{item.emoji}</div>
-                <p className={`font-bold ${isPremium ? 'text-yellow-100' : 'text-foreground'}`}>{item.city}</p>
-                <p className={`text-sm ${isPremium ? 'text-yellow-400/60' : 'text-muted-foreground'}`}>от {item.price} ₽</p>
+                <p className={`font-bold ${isPremium ? 'text-yellow-100' : isDark ? 'text-white' : 'text-foreground'}`}>{item.city}</p>
+                <p className={`text-sm ${isPremium ? 'text-yellow-400/60' : isDark ? 'text-slate-400' : 'text-muted-foreground'}`}>от {item.price} ₽</p>
               </div>
             ))}
           </div>
@@ -252,11 +288,11 @@ export default function Index() {
         <div className="container mx-auto">
           <div className="text-center mb-10 animate-fade-in">
             <h3 className={`text-2xl md:text-3xl font-extrabold tracking-tight mb-2 ${
-              isPremium ? 'text-gradient gradient-premium' : 'text-foreground'
+              isPremium ? 'text-gradient gradient-premium' : isDark ? 'text-white' : 'text-foreground'
             }`}>
               Популярные направления
             </h3>
-            <p className={`text-base ${isPremium ? 'text-yellow-100/50' : 'text-muted-foreground'}`}>
+            <p className={`text-base ${isPremium ? 'text-yellow-100/50' : isDark ? 'text-slate-400' : 'text-muted-foreground'}`}>
               Лучшие цены на ближайшие даты
             </p>
           </div>
@@ -265,7 +301,7 @@ export default function Index() {
               <div
                 key={i}
                 className={`group rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 ${
-                  isPremium ? 'glass-premium hover:border-yellow-500/40' : 'glass-strong hover:shadow-xl'
+                  isPremium ? 'glass-premium hover:border-yellow-500/40' : isDark ? 'glass-dark hover:border-white/10' : 'glass-strong hover:shadow-xl'
                 }`}
                 onClick={() => {
                   setSelectedDestination({ from: userCity || 'Москва', to: dest.city });
@@ -281,7 +317,7 @@ export default function Index() {
                 </div>
                 <div className="p-5">
                   <div className="flex items-center justify-between mb-1">
-                    <h4 className={`text-lg font-bold ${isPremium ? 'text-yellow-100' : 'text-foreground'}`}>
+                    <h4 className={`text-lg font-bold ${isPremium ? 'text-yellow-100' : isDark ? 'text-white' : 'text-foreground'}`}>
                       {dest.city}
                     </h4>
                     <Icon
@@ -292,11 +328,11 @@ export default function Index() {
                       }`}
                     />
                   </div>
-                  <p className={`text-xs mb-3 ${isPremium ? 'text-yellow-100/40' : 'text-muted-foreground'}`}>
+                  <p className={`text-xs mb-3 ${isPremium ? 'text-yellow-100/40' : isDark ? 'text-slate-500' : 'text-muted-foreground'}`}>
                     {dest.desc}
                   </p>
                   <div className="flex items-baseline gap-1">
-                    <span className={`text-xs ${isPremium ? 'text-yellow-100/40' : 'text-muted-foreground'}`}>от</span>
+                    <span className={`text-xs ${isPremium ? 'text-yellow-100/40' : isDark ? 'text-slate-500' : 'text-muted-foreground'}`}>от</span>
                     <span className={`text-xl font-extrabold ${
                       isPremium ? 'text-gradient gradient-premium' : 'text-gradient gradient-primary'
                     }`}>
@@ -314,11 +350,11 @@ export default function Index() {
         <div className="container mx-auto">
           <div className="text-center mb-10 animate-fade-in">
             <h3 className={`text-2xl md:text-3xl font-extrabold tracking-tight mb-2 ${
-              isPremium ? 'text-gradient gradient-premium' : 'text-foreground'
+              isPremium ? 'text-gradient gradient-premium' : isDark ? 'text-white' : 'text-foreground'
             }`}>
               Авиакомпании-партнёры
             </h3>
-            <p className={`text-base ${isPremium ? 'text-yellow-100/50' : 'text-muted-foreground'}`}>
+            <p className={`text-base ${isPremium ? 'text-yellow-100/50' : isDark ? 'text-slate-400' : 'text-muted-foreground'}`}>
               Переходите на сайт для бронирования
             </p>
           </div>
@@ -327,14 +363,14 @@ export default function Index() {
               <div
                 key={i}
                 className={`group rounded-2xl p-6 text-center cursor-pointer transition-all duration-300 hover:-translate-y-1 ${
-                  isPremium ? 'glass-premium hover:border-yellow-500/40' : 'glass-strong hover:shadow-xl'
+                  isPremium ? 'glass-premium hover:border-yellow-500/40' : isDark ? 'glass-dark hover:border-white/10' : 'glass-strong hover:shadow-xl'
                 }`}
                 onClick={() => window.open(airline.url, '_blank')}
               >
                 <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${airline.color} flex items-center justify-center text-3xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
                   {airline.logo}
                 </div>
-                <h4 className={`text-base font-bold mb-1 ${isPremium ? 'text-yellow-100' : 'text-foreground'}`}>
+                <h4 className={`text-base font-bold mb-1 ${isPremium ? 'text-yellow-100' : isDark ? 'text-white' : 'text-foreground'}`}>
                   {airline.name}
                 </h4>
                 <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -347,7 +383,7 @@ export default function Index() {
         </div>
       </section>
 
-      <footer className={`py-10 px-4 ${isPremium ? 'glass-premium' : 'glass-strong'}`}>
+      <footer className={`py-10 px-4 ${isPremium ? 'glass-premium' : isDark ? 'glass-dark' : 'glass-strong'}`}>
         <div className="container mx-auto">
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <div>
@@ -357,28 +393,28 @@ export default function Index() {
                 }`}>
                   <Icon name="Plane" size={16} className="text-white" />
                 </div>
-                <span className={`font-bold ${isPremium ? 'text-yellow-100' : 'text-foreground'}`}>
+                <span className={`font-bold ${isPremium ? 'text-yellow-100' : isDark ? 'text-white' : 'text-foreground'}`}>
                   Путешествие.ру
                 </span>
               </div>
-              <p className={`text-sm ${isPremium ? 'text-yellow-100/40' : 'text-muted-foreground'}`}>
+              <p className={`text-sm ${isPremium ? 'text-yellow-100/40' : isDark ? 'text-slate-400' : 'text-muted-foreground'}`}>
                 Находим лучшие билеты для ваших путешествий
               </p>
             </div>
             <div>
-              <h5 className={`font-bold mb-3 text-sm ${isPremium ? 'text-yellow-100' : 'text-foreground'}`}>Разделы</h5>
+              <h5 className={`font-bold mb-3 text-sm ${isPremium ? 'text-yellow-100' : isDark ? 'text-white' : 'text-foreground'}`}>Разделы</h5>
               <ul className="space-y-2">
                 {['Главная', 'Билеты', 'Направления'].map(item => (
                   <li key={item}>
                     <a href="#" className={`text-sm transition-colors ${
-                      isPremium ? 'text-yellow-100/40 hover:text-yellow-300' : 'text-muted-foreground hover:text-foreground'
+                      isPremium ? 'text-yellow-100/40 hover:text-yellow-300' : isDark ? 'text-slate-400 hover:text-white' : 'text-muted-foreground hover:text-foreground'
                     }`}>{item}</a>
                   </li>
                 ))}
               </ul>
             </div>
             <div>
-              <h5 className={`font-bold mb-3 text-sm ${isPremium ? 'text-yellow-100' : 'text-foreground'}`}>Контакты</h5>
+              <h5 className={`font-bold mb-3 text-sm ${isPremium ? 'text-yellow-100' : isDark ? 'text-white' : 'text-foreground'}`}>Контакты</h5>
               <ul className="space-y-2">
                 <li className="flex items-center gap-2">
                   <Icon name="Phone" size={14} className={isPremium ? 'text-yellow-400' : 'text-muted-foreground'} />
@@ -401,26 +437,27 @@ export default function Index() {
         toCity={selectedDestination?.to || toCity}
         date={date}
         isPremium={isPremium}
+        isDark={isDark}
       />
 
-      <ChatBot isPremium={isPremium} />
+      <ChatBot isPremium={isPremium} isDark={isDark} />
 
       <Dialog open={showPremiumDialog} onOpenChange={setShowPremiumDialog}>
-        <DialogContent className="sm:max-w-sm glass-strong rounded-3xl border-0">
+        <DialogContent className={`sm:max-w-sm rounded-3xl border-0 ${isDark ? 'glass-dark' : 'glass-strong'}`}>
           <DialogHeader>
             <DialogTitle className="text-center text-xl font-extrabold text-gradient gradient-premium">
               Premium доступ
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            <p className="text-center text-sm text-muted-foreground">
+            <p className={`text-center text-sm ${isDark ? 'text-slate-400' : 'text-muted-foreground'}`}>
               Введите код для активации
             </p>
             <Input
               value={premiumInput}
               onChange={(e) => setPremiumInput(e.target.value.toUpperCase())}
               placeholder="Введите код"
-              className="text-center text-lg font-mono h-12 rounded-xl bg-white/50 border-0"
+              className={`text-center text-lg font-mono h-12 rounded-xl border-0 ${isDark ? 'bg-white/5 text-white' : 'bg-white/50'}`}
               maxLength={20}
             />
             <Button

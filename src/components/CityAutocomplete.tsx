@@ -15,6 +15,8 @@ export default function CityAutocomplete({ value, onChange, placeholder, label, 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
@@ -44,10 +46,12 @@ export default function CityAutocomplete({ value, onChange, placeholder, label, 
     setShowSuggestions(false);
   };
 
+  const dk = isDark && !isPremium;
+
   return (
     <div ref={wrapperRef} className="relative">
       <label className={`text-sm font-medium mb-2 block ${
-        isPremium ? 'text-yellow-300/80' : 'text-muted-foreground'
+        isPremium ? 'text-yellow-300/80' : dk ? 'text-slate-400' : 'text-muted-foreground'
       }`}>{label}</label>
       <Input
         value={value}
@@ -56,7 +60,9 @@ export default function CityAutocomplete({ value, onChange, placeholder, label, 
         className={`h-12 rounded-xl border-0 ${
           isPremium
             ? 'bg-white/5 text-yellow-100 placeholder:text-yellow-100/30'
-            : 'bg-white/70 focus:bg-white text-foreground'
+            : dk
+              ? 'bg-white/5 text-slate-200 placeholder:text-slate-500 focus:bg-white/10'
+              : 'bg-white/70 focus:bg-white text-foreground'
         }`}
         onFocus={() => {
           if (suggestions.length > 0) setShowSuggestions(true);
@@ -64,7 +70,7 @@ export default function CityAutocomplete({ value, onChange, placeholder, label, 
       />
       {showSuggestions && suggestions.length > 0 && (
         <div className={`absolute z-50 w-full mt-2 rounded-2xl overflow-hidden ${
-          isPremium ? 'glass-premium' : 'glass-strong'
+          isPremium ? 'glass-premium' : dk ? 'glass-dark' : 'glass-strong'
         }`}>
           {suggestions.map((city, index) => (
             <div
@@ -72,7 +78,9 @@ export default function CityAutocomplete({ value, onChange, placeholder, label, 
               className={`px-4 py-3 cursor-pointer transition-colors text-sm ${
                 isPremium
                   ? 'text-yellow-100 hover:bg-yellow-500/10'
-                  : 'text-foreground hover:bg-black/5'
+                  : dk
+                    ? 'text-slate-200 hover:bg-white/10'
+                    : 'text-foreground hover:bg-black/5'
               }`}
               onClick={() => handleSelectCity(city)}
             >

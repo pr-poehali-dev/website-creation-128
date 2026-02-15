@@ -15,6 +15,7 @@ interface AirlineSelectorProps {
   toCity: string;
   date?: string;
   isPremium?: boolean;
+  isDark?: boolean;
 }
 
 const airlines: Airline[] = [
@@ -24,7 +25,7 @@ const airlines: Airline[] = [
   { name: 'S7', logo: '🟢', url: 'https://www.s7.ru', color: 'from-emerald-500 to-green-600' },
 ];
 
-export default function AirlineSelector({ open, onClose, fromCity, toCity, date, isPremium }: AirlineSelectorProps) {
+export default function AirlineSelector({ open, onClose, fromCity, toCity, date, isPremium, isDark }: AirlineSelectorProps) {
   const handleAirlineSelect = (airline: Airline) => {
     let url = airline.url;
     if (fromCity && toCity) {
@@ -41,17 +42,17 @@ export default function AirlineSelector({ open, onClose, fromCity, toCity, date,
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className={`sm:max-w-lg rounded-3xl border-0 ${
-        isPremium ? 'glass-premium' : 'glass-strong'
+        isPremium ? 'glass-premium' : isDark ? 'glass-dark' : 'glass-strong'
       }`}>
         <DialogHeader>
           <DialogTitle className={`text-xl font-extrabold text-center ${
-            isPremium ? 'text-gradient gradient-premium' : 'text-foreground'
+            isPremium ? 'text-gradient gradient-premium' : isDark ? 'text-white' : 'text-foreground'
           }`}>
             Выберите авиакомпанию
           </DialogTitle>
           {fromCity && toCity && (
             <p className={`text-center text-sm mt-1 ${
-              isPremium ? 'text-yellow-100/50' : 'text-muted-foreground'
+              isPremium ? 'text-yellow-100/50' : isDark ? 'text-slate-400' : 'text-muted-foreground'
             }`}>
               {fromCity} → {toCity}
             </p>
@@ -64,14 +65,16 @@ export default function AirlineSelector({ open, onClose, fromCity, toCity, date,
               className={`group rounded-2xl p-5 text-center cursor-pointer transition-all duration-300 hover:-translate-y-1 ${
                 isPremium
                   ? 'bg-white/5 hover:bg-white/10 border border-yellow-500/10 hover:border-yellow-500/30'
-                  : 'bg-white/50 hover:bg-white/80 border border-white/30 hover:shadow-lg'
+                  : isDark
+                    ? 'bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/15'
+                    : 'bg-white/50 hover:bg-white/80 border border-white/30 hover:shadow-lg'
               }`}
               onClick={() => handleAirlineSelect(airline)}
             >
               <div className={`w-14 h-14 mx-auto mb-3 rounded-2xl bg-gradient-to-br ${airline.color} flex items-center justify-center text-2xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
                 {airline.logo}
               </div>
-              <h4 className={`text-sm font-bold mb-1 ${isPremium ? 'text-yellow-100' : 'text-foreground'}`}>
+              <h4 className={`text-sm font-bold mb-1 ${isPremium ? 'text-yellow-100' : isDark ? 'text-white' : 'text-foreground'}`}>
                 {airline.name}
               </h4>
               <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

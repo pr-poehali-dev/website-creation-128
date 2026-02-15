@@ -5,6 +5,7 @@ import Icon from '@/components/ui/icon';
 
 interface ChatBotProps {
   isPremium: boolean;
+  isDark?: boolean;
 }
 
 interface Message {
@@ -13,7 +14,7 @@ interface Message {
   sender: 'user' | 'bot';
 }
 
-export default function ChatBot({ isPremium }: ChatBotProps) {
+export default function ChatBot({ isPremium, isDark }: ChatBotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -71,6 +72,8 @@ export default function ChatBot({ isPremium }: ChatBotProps) {
     }
   };
 
+  const dk = isDark && !isPremium;
+
   return (
     <>
       <button
@@ -86,10 +89,10 @@ export default function ChatBot({ isPremium }: ChatBotProps) {
 
       {isOpen && (
         <div className={`fixed bottom-24 right-6 z-50 w-[360px] max-w-[calc(100vw-3rem)] rounded-3xl overflow-hidden animate-slide-up ${
-          isPremium ? 'glass-premium' : 'glass-strong'
+          isPremium ? 'glass-premium' : dk ? 'glass-dark' : 'glass-strong'
         }`}>
           <div className={`px-5 py-4 border-b ${
-            isPremium ? 'border-yellow-500/10' : 'border-black/5'
+            isPremium ? 'border-yellow-500/10' : dk ? 'border-white/5' : 'border-black/5'
           }`}>
             <div className="flex items-center gap-3">
               <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
@@ -99,7 +102,7 @@ export default function ChatBot({ isPremium }: ChatBotProps) {
               </div>
               <div>
                 <h3 className={`text-sm font-bold ${
-                  isPremium ? 'text-gradient gradient-premium' : 'text-foreground'
+                  isPremium ? 'text-gradient gradient-premium' : dk ? 'text-white' : 'text-foreground'
                 }`}>
                   {isPremium ? 'Premium Ассистент' : 'Помощник'}
                 </h3>
@@ -108,7 +111,7 @@ export default function ChatBot({ isPremium }: ChatBotProps) {
                     isPremium ? 'bg-yellow-400' : 'bg-emerald-400'
                   }`} />
                   <span className={`text-[10px] ${
-                    isPremium ? 'text-yellow-100/40' : 'text-muted-foreground'
+                    isPremium ? 'text-yellow-100/40' : dk ? 'text-slate-500' : 'text-muted-foreground'
                   }`}>
                     Онлайн
                   </span>
@@ -135,7 +138,9 @@ export default function ChatBot({ isPremium }: ChatBotProps) {
                       : 'gradient-primary text-white'
                     : isPremium
                       ? 'bg-white/5 text-yellow-100/80 border border-yellow-500/10'
-                      : 'bg-white/60 text-foreground border border-white/20'
+                      : dk
+                        ? 'bg-white/5 text-slate-200 border border-white/5'
+                        : 'bg-white/60 text-foreground border border-white/20'
                 }`}>
                   {msg.text}
                 </div>
@@ -144,7 +149,7 @@ export default function ChatBot({ isPremium }: ChatBotProps) {
             {isLoading && (
               <div className="flex justify-start">
                 <div className={`rounded-2xl px-4 py-3 ${
-                  isPremium ? 'bg-white/5 border border-yellow-500/10' : 'bg-white/60 border border-white/20'
+                  isPremium ? 'bg-white/5 border border-yellow-500/10' : dk ? 'bg-white/5 border border-white/5' : 'bg-white/60 border border-white/20'
                 }`}>
                   <div className="flex gap-1.5">
                     <div className={`w-2 h-2 rounded-full animate-bounce ${isPremium ? 'bg-yellow-400' : 'bg-blue-400'}`} style={{ animationDelay: '0ms' }} />
@@ -157,7 +162,7 @@ export default function ChatBot({ isPremium }: ChatBotProps) {
           </div>
 
           <div className={`px-4 pb-4 pt-2 border-t ${
-            isPremium ? 'border-yellow-500/10' : 'border-black/5'
+            isPremium ? 'border-yellow-500/10' : dk ? 'border-white/5' : 'border-black/5'
           }`}>
             <div className="flex gap-2">
               <Input
@@ -168,7 +173,9 @@ export default function ChatBot({ isPremium }: ChatBotProps) {
                 className={`h-11 rounded-xl border-0 text-sm ${
                   isPremium
                     ? 'bg-white/5 text-yellow-100 placeholder:text-yellow-100/30'
-                    : 'bg-white/60 text-foreground placeholder:text-muted-foreground'
+                    : dk
+                      ? 'bg-white/5 text-slate-200 placeholder:text-slate-500'
+                      : 'bg-white/60 text-foreground placeholder:text-muted-foreground'
                 }`}
               />
               <Button
