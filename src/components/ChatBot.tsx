@@ -14,14 +14,14 @@ interface Message {
   sender: 'user' | 'bot';
 }
 
+const CHATBOT_URL = 'https://functions.poehali.dev/758a1ee1-8b4e-4fc1-9c15-4bac393d4177';
+
 export default function ChatBot({ isPremium, isDark }: ChatBotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: isPremium
-        ? 'Добро пожаловать! Я ваш Premium-ассистент. Помогу подобрать лучшие билеты и маршруты.'
-        : 'Привет! Я бот-помощник. Постараюсь помочь, но могу немного путаться',
+      text: '⚠️ Внимание! В связи с повреждением серверов некоторые функции временно недоступны. Я — Чати, ваш ИИ-помощник. Постараюсь ответить на все вопросы, но поиск билетов сейчас не работает.',
       sender: 'bot'
     }
   ]);
@@ -50,10 +50,14 @@ export default function ChatBot({ isPremium, isDark }: ChatBotProps) {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://functions.poehali.dev/758a1ee1-8b4e-4fc1-9c15-4bac393d4177', {
+      const response = await fetch(CHATBOT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userInput, isPremium })
+        body: JSON.stringify({
+          message: userInput,
+          isPremium,
+          history: messages.slice(-6).map(m => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.text }))
+        })
       });
       const data = await response.json();
       setMessages(prev => [...prev, {
@@ -64,7 +68,7 @@ export default function ChatBot({ isPremium, isDark }: ChatBotProps) {
     } catch {
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
-        text: 'Не удалось подключиться. Проверьте интернет.',
+        text: '⚠️ Не удалось подключиться к серверу. Ведутся технические работы — попробуйте позже.',
         sender: 'bot'
       }]);
     } finally {
@@ -104,16 +108,14 @@ export default function ChatBot({ isPremium, isDark }: ChatBotProps) {
                 <h3 className={`text-sm font-bold ${
                   isPremium ? 'text-gradient gradient-premium' : dk ? 'text-white' : 'text-foreground'
                 }`}>
-                  {isPremium ? 'Premium Ассистент' : 'Помощник'}
+                  Чати
                 </h3>
                 <div className="flex items-center gap-1.5">
-                  <div className={`w-1.5 h-1.5 rounded-full ${
-                    isPremium ? 'bg-yellow-400' : 'bg-emerald-400'
-                  }`} />
+                  <div className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
                   <span className={`text-[10px] ${
                     isPremium ? 'text-yellow-100/40' : dk ? 'text-slate-500' : 'text-muted-foreground'
                   }`}>
-                    Онлайн
+                    Ограниченный режим
                   </span>
                 </div>
               </div>
@@ -169,7 +171,7 @@ export default function ChatBot({ isPremium, isDark }: ChatBotProps) {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="Напишите сообщение..."
+                placeholder="Спросите Чати..."
                 className={`h-11 rounded-xl border-0 text-sm ${
                   isPremium
                     ? 'bg-white/5 text-yellow-100 placeholder:text-yellow-100/30'

@@ -454,10 +454,6 @@ export default function Index() {
               <h5 className={`font-bold mb-3 text-sm ${isPremium ? 'text-yellow-100' : isDark ? 'text-white' : 'text-foreground'}`}>Контакты</h5>
               <ul className="space-y-2">
                 <li className="flex items-center gap-2">
-                  <Icon name="Phone" size={14} className={isPremium ? 'text-yellow-400' : 'text-muted-foreground'} />
-                  <span className={`text-sm ${isPremium ? 'text-yellow-100/60' : 'text-muted-foreground'}`}>8-800-555-35-35</span>
-                </li>
-                <li className="flex items-center gap-2">
                   <Icon name="Mail" size={14} className={isPremium ? 'text-yellow-400' : 'text-muted-foreground'} />
                   <span className={`text-sm ${isPremium ? 'text-yellow-100/60' : 'text-muted-foreground'}`}>info@puteshestvie.ru</span>
                 </li>

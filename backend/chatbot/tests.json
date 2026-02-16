@@ -1,34 +1,37 @@
 {
   "tests": [
     {
-      "name": "Basic bot response",
+      "name": "Chat message",
       "method": "POST",
       "path": "/",
       "body": {
-        "message": "Помоги выбрать билет в Москву",
+        "message": "Привет, расскажи о Москве",
         "isPremium": false
       },
       "expectedStatus": 200,
       "expectedBody": {
-        "response": "string",
-        "isPremium": false
+        "response": "string"
       },
       "bodyMatcher": "partial"
     },
     {
-      "name": "Premium bot response",
+      "name": "Empty message",
       "method": "POST",
       "path": "/",
       "body": {
-        "message": "Какой маршрут лучше выбрать?",
-        "isPremium": true
+        "message": ""
       },
-      "expectedStatus": 200,
+      "expectedStatus": 400,
       "expectedBody": {
-        "response": "string",
-        "isPremium": true
+        "error": "string"
       },
       "bodyMatcher": "partial"
+    },
+    {
+      "name": "OPTIONS CORS",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
     }
   ]
 }
