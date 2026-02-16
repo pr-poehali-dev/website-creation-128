@@ -40,12 +40,67 @@ export default function Index() {
   const [premiumInput, setPremiumInput] = useState('');
   const [titleClickCount, setTitleClickCount] = useState(0);
   const [showMaintenance, setShowMaintenance] = useState(true);
+  const [loadingAirline, setLoadingAirline] = useState<{name: string, url: string, progress: number} | null>(null);
 
   const showError = () => {
     toast.error('Сервис временно недоступен. Попробуйте позже.', {
       description: 'Ведутся технические работы на серверах',
     });
   };
+
+  const handleAirlineClick = (name: string, url: string) => {
+    setLoadingAirline({ name, url, progress: 0 });
+  };
+
+  useEffect(() => {
+    if (!loadingAirline) return;
+
+    const speed = isPremium ? 60 : 30;
+    const maxStall = isPremium ? 0 : 72;
+    let stalled = 0;
+    let retries = 0;
+
+    const interval = setInterval(() => {
+      setLoadingAirline(prev => {
+        if (!prev) return null;
+
+        if (!isPremium && prev.progress >= maxStall && stalled < 3) {
+          stalled++;
+          return prev;
+        }
+
+        const increment = isPremium
+          ? Math.random() * 8 + 3
+          : prev.progress < 40
+            ? Math.random() * 3 + 0.5
+            : prev.progress < 70
+              ? Math.random() * 1.5 + 0.2
+              : Math.random() * 2 + 0.5;
+
+        const next = Math.min(prev.progress + increment, 100);
+
+        if (!isPremium && prev.progress >= 68 && prev.progress < 72 && retries < 1) {
+          retries++;
+          toast.error('Ошибка соединения с сервером', {
+            description: 'Повторная попытка подключения...',
+          });
+          return { ...prev, progress: prev.progress - 15 };
+        }
+
+        if (next >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            window.open(prev.url, '_blank');
+            setLoadingAirline(null);
+          }, 300);
+        }
+
+        return { ...prev, progress: next };
+      });
+    }, speed);
+
+    return () => clearInterval(interval);
+  }, [loadingAirline?.name, isPremium]);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('theme') === 'dark' ||
@@ -400,7 +455,7 @@ export default function Index() {
                   className={`group rounded-2xl p-6 text-center cursor-pointer shadow-3d shadow-3d-hover ${
                     isPremium ? 'glass-premium hover:border-yellow-500/40' : isDark ? 'glass-dark hover:border-white/10' : 'glass-strong'
                   }`}
-                  onClick={showError}
+                  onClick={() => handleAirlineClick(airline.name, airline.url)}
                 >
                   <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${airline.color} flex items-center justify-center text-3xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
                     {airline.logo}
@@ -512,6 +567,54 @@ export default function Index() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {loadingAirline && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className={`w-[380px] max-w-[90vw] rounded-3xl p-8 text-center ${isPremium ? 'glass-premium' : isDark ? 'glass-dark' : 'glass-strong'}`}>
+            <div className={`w-16 h-16 mx-auto mb-5 rounded-2xl flex items-center justify-center ${isPremium ? 'gradient-premium' : 'gradient-primary'}`}>
+              <Icon name="Plane" size={28} className="text-white animate-pulse" />
+            </div>
+            <h3 className={`text-lg font-bold mb-1 ${isPremium ? 'text-yellow-100' : isDark ? 'text-white' : 'text-foreground'}`}>
+              Переход на {loadingAirline.name}
+            </h3>
+            <p className={`text-sm mb-5 ${isPremium ? 'text-yellow-100/50' : isDark ? 'text-slate-400' : 'text-muted-foreground'}`}>
+              {isPremium
+                ? 'Premium-канал подключения...'
+                : loadingAirline.progress < 40
+                  ? 'Подключение к серверу...'
+                  : loadingAirline.progress < 70
+                    ? '⚠️ Сервер повреждён, загрузка замедлена...'
+                    : 'Почти готово, завершаем соединение...'}
+            </p>
+            <div className={`w-full h-2.5 rounded-full overflow-hidden mb-3 ${isDark ? 'bg-white/10' : 'bg-black/10'}`}>
+              <div
+                className={`h-full rounded-full transition-all duration-300 ${
+                  isPremium
+                    ? 'gradient-premium'
+                    : loadingAirline.progress < 70
+                      ? 'bg-gradient-to-r from-blue-500 to-indigo-500'
+                      : 'bg-gradient-to-r from-orange-500 to-red-500'
+                }`}
+                style={{ width: `${loadingAirline.progress}%` }}
+              />
+            </div>
+            <p className={`text-xs font-mono ${isPremium ? 'text-yellow-400/60' : isDark ? 'text-slate-500' : 'text-muted-foreground'}`}>
+              {Math.round(loadingAirline.progress)}%
+            </p>
+            {!isPremium && loadingAirline.progress > 30 && loadingAirline.progress < 90 && (
+              <p className="text-[10px] text-red-400/80 mt-2">
+                В связи с повреждением серверов загрузка увеличена
+              </p>
+            )}
+            <button
+              onClick={() => setLoadingAirline(null)}
+              className={`mt-4 text-xs ${isPremium ? 'text-yellow-400/40 hover:text-yellow-300' : isDark ? 'text-slate-500 hover:text-slate-300' : 'text-muted-foreground hover:text-foreground'} transition-colors`}
+            >
+              Отмена
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
