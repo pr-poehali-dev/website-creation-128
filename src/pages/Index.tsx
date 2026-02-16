@@ -28,8 +28,10 @@ const popularDestinations = [
 ];
 
 const PREMIUM_CODE = 'PREMIUM2025';
+const MAINTENANCE_END = new Date('2026-02-17T17:25:00');
 
 export default function Index() {
+  const isMaintenance = new Date() < MAINTENANCE_END;
   const [userCity, setUserCity] = useState('');
   const [fromCity, setFromCity] = useState('');
   const [toCity, setToCity] = useState('');
@@ -40,7 +42,7 @@ export default function Index() {
   const [showPremiumDialog, setShowPremiumDialog] = useState(false);
   const [premiumInput, setPremiumInput] = useState('');
   const [titleClickCount, setTitleClickCount] = useState(0);
-  const [showMaintenance, setShowMaintenance] = useState(true);
+  const [showMaintenance, setShowMaintenance] = useState(isMaintenance);
   const [loadingAirline, setLoadingAirline] = useState<{name: string, url: string, progress: number} | null>(null);
   const [loadingSearch, setLoadingSearch] = useState<{progress: number} | null>(null);
   const [bsod, setBsod] = useState(false);
@@ -57,7 +59,14 @@ export default function Index() {
     return false;
   };
 
-  const showError = () => {
+  const showError = (destFrom?: string, destTo?: string) => {
+    if (!isMaintenance) {
+      if (destFrom && destTo) {
+        setSelectedDestination({ from: destFrom, to: destTo });
+        setShowAirlineSelector(true);
+      }
+      return;
+    }
     if (trackClick()) return;
     toast.error('Сервис временно недоступен. Попробуйте позже.', {
       description: 'Ведутся технические работы на серверах',
@@ -65,13 +74,17 @@ export default function Index() {
   };
 
   const handleAirlineClick = (name: string, url: string) => {
-    if (trackClick()) return;
-    setLoadingAirline({ name, url, progress: 0 });
+    if (isMaintenance && trackClick()) return;
+    if (isMaintenance) {
+      setLoadingAirline({ name, url, progress: 0 });
+    } else {
+      window.open(url, '_blank');
+    }
   };
 
   const handleSearchClick = () => {
-    if (trackClick()) return;
-    if (isPremium) {
+    if (isMaintenance && trackClick()) return;
+    if (isPremium || !isMaintenance) {
       if (fromCity && toCity) {
         setSelectedDestination({ from: fromCity, to: toCity });
         setShowAirlineSelector(true);
@@ -215,12 +228,14 @@ export default function Index() {
                   <p className="text-white/80 text-xs md:text-sm truncate">В связи с повреждением серверов некоторые функции временно недоступны. Приносим извинения.</p>
                 </div>
               </div>
-              <button
-                onClick={() => setShowMaintenance(false)}
-                className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center flex-shrink-0 transition-colors"
-              >
-                <Icon name="X" size={16} className="text-white" />
-              </button>
+              {!isMaintenance && (
+                <button
+                  onClick={() => setShowMaintenance(false)}
+                  className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center flex-shrink-0 transition-colors"
+                >
+                  <Icon name="X" size={16} className="text-white" />
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -428,7 +443,7 @@ export default function Index() {
                         ? 'glass-dark hover:border-white/10'
                         : 'glass-strong'
                   }`}
-                  onClick={showError}
+                  onClick={() => showError(userCity || 'Москва', item.city)}
                 >
                   <div className="text-4xl mb-2">{item.emoji}</div>
                   <p className={`font-bold ${isPremium ? 'text-yellow-100' : isDark ? 'text-white' : 'text-foreground'}`}>{item.city}</p>
@@ -462,7 +477,7 @@ export default function Index() {
                   className={`group rounded-2xl overflow-hidden cursor-pointer shadow-3d shadow-3d-hover ${
                     isPremium ? 'glass-premium hover:border-yellow-500/40' : isDark ? 'glass-dark hover:border-white/10' : 'glass-strong'
                   }`}
-                  onClick={showError}
+                  onClick={() => showError(userCity || 'Москва', dest.city)}
                 >
                   <div className={`h-28 flex items-center justify-center text-6xl transition-transform duration-500 group-hover:scale-110 ${
                     isPremium
