@@ -39,6 +39,13 @@ export default function Index() {
   const [showPremiumDialog, setShowPremiumDialog] = useState(false);
   const [premiumInput, setPremiumInput] = useState('');
   const [titleClickCount, setTitleClickCount] = useState(0);
+  const [showMaintenance, setShowMaintenance] = useState(true);
+
+  const showError = () => {
+    toast.error('Сервис временно недоступен. Попробуйте позже.', {
+      description: 'Ведутся технические работы на серверах',
+    });
+  };
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('theme') === 'dark' ||
@@ -70,7 +77,31 @@ export default function Index() {
   return (
     <div className={`min-h-screen ${bgBase} transition-all duration-700`}>
 
-      <header className={`fixed top-0 left-0 right-0 z-50 ${isPremium ? 'glass-premium' : isDark ? 'glass-dark' : 'glass-strong'}`}>
+      {showMaintenance && (
+        <div className="fixed top-0 left-0 right-0 z-[100] animate-fade-in">
+          <div className="bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white px-4 py-3 shadow-lg">
+            <div className="container mx-auto flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0 animate-pulse">
+                  <Icon name="AlertTriangle" size={18} className="text-white" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-bold text-sm md:text-base truncate">Технические работы</p>
+                  <p className="text-white/80 text-xs md:text-sm truncate">В связи с повреждением серверов некоторые функции временно недоступны. Приносим извинения.</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowMaintenance(false)}
+                className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center flex-shrink-0 transition-colors"
+              >
+                <Icon name="X" size={16} className="text-white" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <header className={`fixed left-0 right-0 z-50 transition-all duration-300 ${showMaintenance ? 'top-[52px] md:top-[48px]' : 'top-0'} ${isPremium ? 'glass-premium' : isDark ? 'glass-dark' : 'glass-strong'}`}>
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-3d transition-transform duration-300 hover:scale-110 hover:rotate-6 ${
@@ -105,6 +136,7 @@ export default function Index() {
                 <a
                   key={item}
                   href="#"
+                  onClick={(e) => { e.preventDefault(); showError(); }}
                   className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                     isPremium
                       ? 'text-yellow-200/80 hover:text-yellow-100 hover:bg-yellow-500/10'
@@ -133,7 +165,7 @@ export default function Index() {
         </div>
       </header>
 
-      <section className="relative pt-28 pb-8 px-4 overflow-hidden">
+      <section className={`relative pb-8 px-4 overflow-hidden transition-all duration-300 ${showMaintenance ? 'pt-40' : 'pt-28'}`}>
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className={`absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full blur-3xl opacity-20 ${
             isPremium ? 'bg-yellow-500' : 'bg-blue-500'
@@ -227,12 +259,7 @@ export default function Index() {
                   ? 'gradient-premium text-black hover:opacity-90 shadow-lg shadow-yellow-500/25'
                   : 'gradient-primary text-white hover:opacity-90 shadow-lg shadow-blue-500/25'
               }`}
-              onClick={() => {
-                if (fromCity && toCity) {
-                  setSelectedDestination({ from: fromCity, to: toCity });
-                  setShowAirlineSelector(true);
-                }
-              }}
+              onClick={showError}
             >
               <Icon name="Search" className="mr-2" size={20} />
               Найти билеты
@@ -276,12 +303,7 @@ export default function Index() {
                         ? 'glass-dark hover:border-white/10'
                         : 'glass-strong'
                   }`}
-                  onClick={() => {
-                    setFromCity(userCity || 'Москва');
-                    setToCity(item.city);
-                    setSelectedDestination({ from: userCity || 'Москва', to: item.city });
-                    setShowAirlineSelector(true);
-                  }}
+                  onClick={showError}
                 >
                   <div className="text-4xl mb-2">{item.emoji}</div>
                   <p className={`font-bold ${isPremium ? 'text-yellow-100' : isDark ? 'text-white' : 'text-foreground'}`}>{item.city}</p>
@@ -315,10 +337,7 @@ export default function Index() {
                   className={`group rounded-2xl overflow-hidden cursor-pointer shadow-3d shadow-3d-hover ${
                     isPremium ? 'glass-premium hover:border-yellow-500/40' : isDark ? 'glass-dark hover:border-white/10' : 'glass-strong'
                   }`}
-                  onClick={() => {
-                    setSelectedDestination({ from: userCity || 'Москва', to: dest.city });
-                    setShowAirlineSelector(true);
-                  }}
+                  onClick={showError}
                 >
                   <div className={`h-28 flex items-center justify-center text-6xl transition-transform duration-500 group-hover:scale-110 ${
                     isPremium
@@ -381,7 +400,7 @@ export default function Index() {
                   className={`group rounded-2xl p-6 text-center cursor-pointer shadow-3d shadow-3d-hover ${
                     isPremium ? 'glass-premium hover:border-yellow-500/40' : isDark ? 'glass-dark hover:border-white/10' : 'glass-strong'
                   }`}
-                  onClick={() => window.open(airline.url, '_blank')}
+                  onClick={showError}
                 >
                   <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${airline.color} flex items-center justify-center text-3xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
                     {airline.logo}
