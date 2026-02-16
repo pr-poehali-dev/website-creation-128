@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { toast } from 'sonner';
 import TiltCard from '@/components/TiltCard';
 import ScrollReveal from '@/components/ScrollReveal';
+import BsodScreen from '@/components/BsodScreen';
 
 const airlines = [
   { name: 'Аэрофлот', logo: '✈️', url: 'https://www.aeroflot.ru', color: 'from-red-500 to-rose-600' },
@@ -41,15 +42,45 @@ export default function Index() {
   const [titleClickCount, setTitleClickCount] = useState(0);
   const [showMaintenance, setShowMaintenance] = useState(true);
   const [loadingAirline, setLoadingAirline] = useState<{name: string, url: string, progress: number} | null>(null);
+  const [loadingSearch, setLoadingSearch] = useState<{progress: number} | null>(null);
+  const [bsod, setBsod] = useState(false);
+  const [clickTimestamps, setClickTimestamps] = useState<number[]>([]);
+
+  const trackClick = () => {
+    const now = Date.now();
+    const recent = [...clickTimestamps, now].filter(t => now - t < 60000);
+    setClickTimestamps(recent);
+    if (recent.length >= 5 && !isPremium) {
+      setBsod(true);
+      return true;
+    }
+    return false;
+  };
 
   const showError = () => {
+    if (trackClick()) return;
     toast.error('Сервис временно недоступен. Попробуйте позже.', {
       description: 'Ведутся технические работы на серверах',
     });
   };
 
   const handleAirlineClick = (name: string, url: string) => {
+    if (trackClick()) return;
     setLoadingAirline({ name, url, progress: 0 });
+  };
+
+  const handleSearchClick = () => {
+    if (trackClick()) return;
+    if (isPremium) {
+      if (fromCity && toCity) {
+        setSelectedDestination({ from: fromCity, to: toCity });
+        setShowAirlineSelector(true);
+      } else {
+        toast('Укажите города вылета и прилёта');
+      }
+      return;
+    }
+    setLoadingSearch({ progress: 0 });
   };
 
   useEffect(() => {
@@ -101,6 +132,45 @@ export default function Index() {
 
     return () => clearInterval(interval);
   }, [loadingAirline?.name, isPremium]);
+
+  useEffect(() => {
+    if (!loadingSearch) return;
+
+    let retried = false;
+    const interval = setInterval(() => {
+      setLoadingSearch(prev => {
+        if (!prev) return null;
+
+        const increment = prev.progress < 50
+          ? Math.random() * 2 + 0.3
+          : prev.progress < 80
+            ? Math.random() * 1 + 0.1
+            : Math.random() * 1.5 + 0.3;
+
+        const next = Math.min(prev.progress + increment, 100);
+
+        if (prev.progress >= 55 && prev.progress < 60 && !retried) {
+          retried = true;
+          toast.error('Таймаут сервера', { description: 'Переподключение...' });
+          return { progress: prev.progress - 20 };
+        }
+
+        if (next >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            setLoadingSearch(null);
+            toast.error('Не удалось загрузить результаты', {
+              description: 'Серверы повреждены. Попробуйте позже.',
+            });
+          }, 500);
+        }
+
+        return { progress: next };
+      });
+    }, 40);
+
+    return () => clearInterval(interval);
+  }, [loadingSearch !== null]);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('theme') === 'dark' ||
@@ -314,7 +384,7 @@ export default function Index() {
                   ? 'gradient-premium text-black hover:opacity-90 shadow-lg shadow-yellow-500/25'
                   : 'gradient-primary text-white hover:opacity-90 shadow-lg shadow-blue-500/25'
               }`}
-              onClick={showError}
+              onClick={handleSearchClick}
             >
               <Icon name="Search" className="mr-2" size={20} />
               Найти билеты
@@ -614,6 +684,54 @@ export default function Index() {
             </button>
           </div>
         </div>
+      )}
+
+      {loadingSearch && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className={`w-[380px] max-w-[90vw] rounded-3xl p-8 text-center ${isDark ? 'glass-dark' : 'glass-strong'}`}>
+            <div className="w-16 h-16 mx-auto mb-5 rounded-2xl gradient-primary flex items-center justify-center">
+              <Icon name="Search" size={28} className="text-white animate-pulse" />
+            </div>
+            <h3 className={`text-lg font-bold mb-1 ${isDark ? 'text-white' : 'text-foreground'}`}>
+              Поиск билетов
+            </h3>
+            <p className={`text-sm mb-5 ${isDark ? 'text-slate-400' : 'text-muted-foreground'}`}>
+              {loadingSearch.progress < 30
+                ? 'Подключение к серверам авиакомпаний...'
+                : loadingSearch.progress < 60
+                  ? '⚠️ Сервер не отвечает, повторная попытка...'
+                  : loadingSearch.progress < 90
+                    ? 'Загрузка данных через резервный канал...'
+                    : 'Обработка результатов...'}
+            </p>
+            <div className={`w-full h-2.5 rounded-full overflow-hidden mb-3 ${isDark ? 'bg-white/10' : 'bg-black/10'}`}>
+              <div
+                className={`h-full rounded-full transition-all duration-300 ${
+                  loadingSearch.progress < 60
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-500'
+                    : 'bg-gradient-to-r from-orange-500 to-red-500'
+                }`}
+                style={{ width: `${loadingSearch.progress}%` }}
+              />
+            </div>
+            <p className={`text-xs font-mono ${isDark ? 'text-slate-500' : 'text-muted-foreground'}`}>
+              {Math.round(loadingSearch.progress)}%
+            </p>
+            <p className="text-[10px] text-red-400/80 mt-2">
+              Серверы повреждены — поиск может не дать результатов
+            </p>
+            <button
+              onClick={() => setLoadingSearch(null)}
+              className={`mt-4 text-xs ${isDark ? 'text-slate-500 hover:text-slate-300' : 'text-muted-foreground hover:text-foreground'} transition-colors`}
+            >
+              Отмена
+            </button>
+          </div>
+        </div>
+      )}
+
+      {bsod && (
+        <BsodScreen onComplete={() => { setBsod(false); setClickTimestamps([]); }} />
       )}
     </div>
   );
