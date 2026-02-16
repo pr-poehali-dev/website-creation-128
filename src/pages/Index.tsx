@@ -8,6 +8,7 @@ import ChatBot from '@/components/ChatBot';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import TiltCard from '@/components/TiltCard';
+import ScrollReveal from '@/components/ScrollReveal';
 
 const airlines = [
   { name: 'Аэрофлот', logo: '✈️', url: 'https://www.aeroflot.ru', color: 'from-red-500 to-rose-600' },
@@ -247,43 +248,46 @@ export default function Index() {
           }`} />
         </div>
         <div className="container mx-auto relative z-10">
-          <div className="max-w-3xl mx-auto text-center mb-8 animate-fade-in">
-            <h3 className={`text-2xl md:text-3xl font-extrabold tracking-tight mb-2 depth-text ${
-              isPremium ? 'text-gradient gradient-premium' : isDark ? 'text-white' : 'text-foreground'
-            }`}>
-              С Годом народного единства!
-            </h3>
-            <p className={`text-base ${isPremium ? 'text-yellow-100/50' : isDark ? 'text-slate-400' : 'text-muted-foreground'}`}>
-              Откройте красоту России
-            </p>
-          </div>
+          <ScrollReveal direction="up">
+            <div className="max-w-3xl mx-auto text-center mb-8">
+              <h3 className={`text-2xl md:text-3xl font-extrabold tracking-tight mb-2 depth-text ${
+                isPremium ? 'text-gradient gradient-premium' : isDark ? 'text-white' : 'text-foreground'
+              }`}>
+                С Годом народного единства!
+              </h3>
+              <p className={`text-base ${isPremium ? 'text-yellow-100/50' : isDark ? 'text-slate-400' : 'text-muted-foreground'}`}>
+                Откройте красоту России
+              </p>
+            </div>
+          </ScrollReveal>
           <div className="grid md:grid-cols-3 gap-4 max-w-3xl mx-auto">
             {[
               { city: 'Москва', emoji: '🏛️', price: '5 490' },
               { city: 'Санкт-Петербург', emoji: '🌉', price: '4 200' },
               { city: 'Казань', emoji: '🕌', price: '6 100' },
             ].map((item, i) => (
-              <TiltCard
-                key={i}
-                tiltMax={15}
-                className={`rounded-2xl p-5 text-center cursor-pointer shadow-3d shadow-3d-hover ${
-                  isPremium
-                    ? 'glass-premium hover:border-yellow-500/40'
-                    : isDark
-                      ? 'glass-dark hover:border-white/10'
-                      : 'glass-strong'
-                }`}
-                onClick={() => {
-                  setFromCity(userCity || 'Москва');
-                  setToCity(item.city);
-                  setSelectedDestination({ from: userCity || 'Москва', to: item.city });
-                  setShowAirlineSelector(true);
-                }}
-              >
-                <div className="text-4xl mb-2">{item.emoji}</div>
-                <p className={`font-bold ${isPremium ? 'text-yellow-100' : isDark ? 'text-white' : 'text-foreground'}`}>{item.city}</p>
-                <p className={`text-sm ${isPremium ? 'text-yellow-400/60' : isDark ? 'text-slate-400' : 'text-muted-foreground'}`}>от {item.price} ₽</p>
-              </TiltCard>
+              <ScrollReveal key={i} direction="up" delay={i * 120}>
+                <TiltCard
+                  tiltMax={15}
+                  className={`rounded-2xl p-5 text-center cursor-pointer shadow-3d shadow-3d-hover ${
+                    isPremium
+                      ? 'glass-premium hover:border-yellow-500/40'
+                      : isDark
+                        ? 'glass-dark hover:border-white/10'
+                        : 'glass-strong'
+                  }`}
+                  onClick={() => {
+                    setFromCity(userCity || 'Москва');
+                    setToCity(item.city);
+                    setSelectedDestination({ from: userCity || 'Москва', to: item.city });
+                    setShowAirlineSelector(true);
+                  }}
+                >
+                  <div className="text-4xl mb-2">{item.emoji}</div>
+                  <p className={`font-bold ${isPremium ? 'text-yellow-100' : isDark ? 'text-white' : 'text-foreground'}`}>{item.city}</p>
+                  <p className={`text-sm ${isPremium ? 'text-yellow-400/60' : isDark ? 'text-slate-400' : 'text-muted-foreground'}`}>от {item.price} ₽</p>
+                </TiltCard>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -291,62 +295,65 @@ export default function Index() {
 
       <section className="py-16 px-4">
         <div className="container mx-auto">
-          <div className="text-center mb-10 animate-fade-in">
-            <h3 className={`text-2xl md:text-3xl font-extrabold tracking-tight mb-2 depth-text ${
-              isPremium ? 'text-gradient gradient-premium' : isDark ? 'text-white' : 'text-foreground'
-            }`}>
-              Популярные направления
-            </h3>
-            <p className={`text-base ${isPremium ? 'text-yellow-100/50' : isDark ? 'text-slate-400' : 'text-muted-foreground'}`}>
-              Лучшие цены на ближайшие даты
-            </p>
-          </div>
+          <ScrollReveal direction="up">
+            <div className="text-center mb-10">
+              <h3 className={`text-2xl md:text-3xl font-extrabold tracking-tight mb-2 depth-text ${
+                isPremium ? 'text-gradient gradient-premium' : isDark ? 'text-white' : 'text-foreground'
+              }`}>
+                Популярные направления
+              </h3>
+              <p className={`text-base ${isPremium ? 'text-yellow-100/50' : isDark ? 'text-slate-400' : 'text-muted-foreground'}`}>
+                Лучшие цены на ближайшие даты
+              </p>
+            </div>
+          </ScrollReveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
             {popularDestinations.map((dest, i) => (
-              <TiltCard
-                key={i}
-                tiltMax={12}
-                className={`group rounded-2xl overflow-hidden cursor-pointer shadow-3d shadow-3d-hover ${
-                  isPremium ? 'glass-premium hover:border-yellow-500/40' : isDark ? 'glass-dark hover:border-white/10' : 'glass-strong'
-                }`}
-                onClick={() => {
-                  setSelectedDestination({ from: userCity || 'Москва', to: dest.city });
-                  setShowAirlineSelector(true);
-                }}
-              >
-                <div className={`h-28 flex items-center justify-center text-6xl transition-transform duration-500 group-hover:scale-110 ${
-                  isPremium
-                    ? 'bg-gradient-to-br from-yellow-500/10 to-orange-500/10'
-                    : 'bg-gradient-to-br from-blue-500/10 to-purple-500/10'
-                }`}>
-                  {dest.emoji}
-                </div>
-                <div className="p-5">
-                  <div className="flex items-center justify-between mb-1">
-                    <h4 className={`text-lg font-bold ${isPremium ? 'text-yellow-100' : isDark ? 'text-white' : 'text-foreground'}`}>
-                      {dest.city}
-                    </h4>
-                    <Icon
-                      name="ArrowUpRight"
-                      size={18}
-                      className={`opacity-0 group-hover:opacity-100 transition-opacity ${
-                        isPremium ? 'text-yellow-400' : 'text-primary'
-                      }`}
-                    />
+              <ScrollReveal key={i} direction={i % 2 === 0 ? 'up' : 'scale'} delay={i * 100}>
+                <TiltCard
+                  tiltMax={12}
+                  className={`group rounded-2xl overflow-hidden cursor-pointer shadow-3d shadow-3d-hover ${
+                    isPremium ? 'glass-premium hover:border-yellow-500/40' : isDark ? 'glass-dark hover:border-white/10' : 'glass-strong'
+                  }`}
+                  onClick={() => {
+                    setSelectedDestination({ from: userCity || 'Москва', to: dest.city });
+                    setShowAirlineSelector(true);
+                  }}
+                >
+                  <div className={`h-28 flex items-center justify-center text-6xl transition-transform duration-500 group-hover:scale-110 ${
+                    isPremium
+                      ? 'bg-gradient-to-br from-yellow-500/10 to-orange-500/10'
+                      : 'bg-gradient-to-br from-blue-500/10 to-purple-500/10'
+                  }`}>
+                    {dest.emoji}
                   </div>
-                  <p className={`text-xs mb-3 ${isPremium ? 'text-yellow-100/40' : isDark ? 'text-slate-500' : 'text-muted-foreground'}`}>
-                    {dest.desc}
-                  </p>
-                  <div className="flex items-baseline gap-1">
-                    <span className={`text-xs ${isPremium ? 'text-yellow-100/40' : isDark ? 'text-slate-500' : 'text-muted-foreground'}`}>от</span>
-                    <span className={`text-xl font-extrabold ${
-                      isPremium ? 'text-gradient gradient-premium' : 'text-gradient gradient-primary'
-                    }`}>
-                      {dest.price} ₽
-                    </span>
+                  <div className="p-5">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className={`text-lg font-bold ${isPremium ? 'text-yellow-100' : isDark ? 'text-white' : 'text-foreground'}`}>
+                        {dest.city}
+                      </h4>
+                      <Icon
+                        name="ArrowUpRight"
+                        size={18}
+                        className={`opacity-0 group-hover:opacity-100 transition-opacity ${
+                          isPremium ? 'text-yellow-400' : 'text-primary'
+                        }`}
+                      />
+                    </div>
+                    <p className={`text-xs mb-3 ${isPremium ? 'text-yellow-100/40' : isDark ? 'text-slate-500' : 'text-muted-foreground'}`}>
+                      {dest.desc}
+                    </p>
+                    <div className="flex items-baseline gap-1">
+                      <span className={`text-xs ${isPremium ? 'text-yellow-100/40' : isDark ? 'text-slate-500' : 'text-muted-foreground'}`}>от</span>
+                      <span className={`text-xl font-extrabold ${
+                        isPremium ? 'text-gradient gradient-premium' : 'text-gradient gradient-primary'
+                      }`}>
+                        {dest.price} ₽
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </TiltCard>
+                </TiltCard>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -354,42 +361,46 @@ export default function Index() {
 
       <section className="py-16 px-4">
         <div className="container mx-auto">
-          <div className="text-center mb-10 animate-fade-in">
-            <h3 className={`text-2xl md:text-3xl font-extrabold tracking-tight mb-2 depth-text ${
-              isPremium ? 'text-gradient gradient-premium' : isDark ? 'text-white' : 'text-foreground'
-            }`}>
-              Авиакомпании-партнёры
-            </h3>
-            <p className={`text-base ${isPremium ? 'text-yellow-100/50' : isDark ? 'text-slate-400' : 'text-muted-foreground'}`}>
-              Переходите на сайт для бронирования
-            </p>
-          </div>
+          <ScrollReveal direction="up">
+            <div className="text-center mb-10">
+              <h3 className={`text-2xl md:text-3xl font-extrabold tracking-tight mb-2 depth-text ${
+                isPremium ? 'text-gradient gradient-premium' : isDark ? 'text-white' : 'text-foreground'
+              }`}>
+                Авиакомпании-партнёры
+              </h3>
+              <p className={`text-base ${isPremium ? 'text-yellow-100/50' : isDark ? 'text-slate-400' : 'text-muted-foreground'}`}>
+                Переходите на сайт для бронирования
+              </p>
+            </div>
+          </ScrollReveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
             {airlines.map((airline, i) => (
-              <TiltCard
-                key={i}
-                tiltMax={18}
-                className={`group rounded-2xl p-6 text-center cursor-pointer shadow-3d shadow-3d-hover ${
-                  isPremium ? 'glass-premium hover:border-yellow-500/40' : isDark ? 'glass-dark hover:border-white/10' : 'glass-strong'
-                }`}
-                onClick={() => window.open(airline.url, '_blank')}
-              >
-                <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${airline.color} flex items-center justify-center text-3xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
-                  {airline.logo}
-                </div>
-                <h4 className={`text-base font-bold mb-1 ${isPremium ? 'text-yellow-100' : isDark ? 'text-white' : 'text-foreground'}`}>
-                  {airline.name}
-                </h4>
-                <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className={`text-xs ${isPremium ? 'text-yellow-400' : 'text-primary'}`}>Перейти</span>
-                  <Icon name="ExternalLink" size={12} className={isPremium ? 'text-yellow-400' : 'text-primary'} />
-                </div>
-              </TiltCard>
+              <ScrollReveal key={i} direction="flip" delay={i * 100}>
+                <TiltCard
+                  tiltMax={18}
+                  className={`group rounded-2xl p-6 text-center cursor-pointer shadow-3d shadow-3d-hover ${
+                    isPremium ? 'glass-premium hover:border-yellow-500/40' : isDark ? 'glass-dark hover:border-white/10' : 'glass-strong'
+                  }`}
+                  onClick={() => window.open(airline.url, '_blank')}
+                >
+                  <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${airline.color} flex items-center justify-center text-3xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
+                    {airline.logo}
+                  </div>
+                  <h4 className={`text-base font-bold mb-1 ${isPremium ? 'text-yellow-100' : isDark ? 'text-white' : 'text-foreground'}`}>
+                    {airline.name}
+                  </h4>
+                  <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className={`text-xs ${isPremium ? 'text-yellow-400' : 'text-primary'}`}>Перейти</span>
+                    <Icon name="ExternalLink" size={12} className={isPremium ? 'text-yellow-400' : 'text-primary'} />
+                  </div>
+                </TiltCard>
+              </ScrollReveal>
             ))}
           </div>
         </div>
       </section>
 
+      <ScrollReveal direction="up">
       <footer className={`py-10 px-4 ${isPremium ? 'glass-premium' : isDark ? 'glass-dark' : 'glass-strong'}`}>
         <div className="container mx-auto">
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
@@ -436,6 +447,7 @@ export default function Index() {
           </div>
         </div>
       </footer>
+      </ScrollReveal>
 
       <AirlineSelector
         open={showAirlineSelector}
